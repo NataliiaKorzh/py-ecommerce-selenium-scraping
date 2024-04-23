@@ -8,12 +8,17 @@ from selenium.common import NoSuchElementException
 from selenium.webdriver.common.by import By
 
 BASE_URL = "https://webscraper.io/"
-HOME_URL = urljoin(BASE_URL, "test-sites/e-commerce/more/")
-COMPUTERS_URL = urljoin(BASE_URL, "test-sites/e-commerce/more/computers")
-LAPTOPS_URL = urljoin(BASE_URL, "test-sites/e-commerce/more/computers/laptops")
-TABLETS_URL = urljoin(BASE_URL, "test-sites/e-commerce/more/computers/tablets")
-PHONES_URL = urljoin(BASE_URL, "test-sites/e-commerce/more/phones")
-TOUCH_URL = urljoin(BASE_URL, "test-sites/e-commerce/more/phones/touch")
+
+PAGES = {
+    "home": urljoin(BASE_URL, "test-sites/e-commerce/more/"),
+    "computers": urljoin(BASE_URL, "test-sites/e-commerce/more/computers"),
+    "laptops": urljoin(BASE_URL,
+                       "test-sites/e-commerce/more/computers/laptops"),
+    "tablets": urljoin(BASE_URL,
+                       "test-sites/e-commerce/more/computers/tablets"),
+    "phones": urljoin(BASE_URL, "test-sites/e-commerce/more/phones"),
+    "touch": urljoin(BASE_URL, "test-sites/e-commerce/more/phones/touch"),
+}
 
 
 @dataclass
@@ -28,7 +33,7 @@ class Product:
 PRODUCT_FIELDS = [field.name for field in fields(Product)]
 
 
-def parse_single_product(product_soup: Tag) -> "Product":
+def parse_single_product(product_soup: Tag) -> Product:
     return Product(
         title=product_soup.select_one(".title")["title"],
         description=product_soup.select_one(".description").text.replace(
@@ -78,17 +83,9 @@ def save_to_csv(products: list[Product], file_name: str) -> None:
             writer.writerow(row)
 
 
-def get_all_products() -> [Product]:
-    pages = {
-        "home": HOME_URL,
-        "computers": COMPUTERS_URL,
-        "laptops": LAPTOPS_URL,
-        "tablets": TABLETS_URL,
-        "phones": PHONES_URL,
-        "touch": TOUCH_URL,
-    }
+def get_all_products() -> None:
 
-    for page_name, page_url in pages.items():
+    for page_name, page_url in PAGES.items():
         products = parse_all_products(page_url)
         save_to_csv(products, f"{page_name}.csv")
 
